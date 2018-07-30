@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Bom
+Bundle-SymbolicName: org.kenos.idempiere.lbr.productionbom;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.adempiere.base;bundle-version="4.1.0",
+ org.kenos.idempiere.lbr.base;bundle-version="1.0.0"
+Service-Component: OSGI-INF/ProcessFactory.xml,
+ OSGI-INF/ModelValidatorFactory.xml,
+ OSGI-INF/POGBOMDropPBProvider.xml
+Bundle-ActivationPolicy: lazy
+Export-Package: org.kenos.idempiere.lbr.productionbom.process
