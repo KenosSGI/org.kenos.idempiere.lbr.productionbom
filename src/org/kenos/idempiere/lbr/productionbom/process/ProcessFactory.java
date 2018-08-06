@@ -18,6 +18,8 @@ public class ProcessFactory implements IProcessFactory
 			return new ProcProductionCreate();
 		else if ("org.kenos.idempiere.lbr.base.process.POGBOMDrop".equals (className))
 			return new POGBOMDrop();
+		else if ("org.libero.process.CopyFromBOM".equals (className))
+			return new CopyFromBOM();
 		return null;
 	}	//	newProcessInstance
 }	//	CalloutFactory

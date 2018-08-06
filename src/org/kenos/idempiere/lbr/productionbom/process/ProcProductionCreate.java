@@ -77,9 +77,9 @@ public class ProcProductionCreate extends SvrProcess
             + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND COALESCE (bom.ValidTo, SYSDATE)";
            
 			if (C_BPartner_ID > 0)
-    			sql = sql + "AND bom.C_BPartner_ID = " + C_BPartner_ID;
+    			sql = sql + " AND bom.C_BPartner_ID = " + C_BPartner_ID;
 			else
-				sql = sql + "AND bom.C_BPartner_ID IS NULL";
+				sql = sql + " AND bom.C_BPartner_ID IS NULL";
 			
             sql = sql + " ))/cc.currentcostprice))"
             + " FROM m_product pp"
@@ -92,13 +92,36 @@ public class ProcProductionCreate extends SvrProcess
 		
 		if (costPercentageDiff == null)
 		{
-			costPercentageDiff = Env.ZERO;
-			String msg = "Could not retrieve costs";
-			if (MSysConfig.getBooleanValue(MSysConfig.MFG_ValidateCostsOnCreate, false, getAD_Client_ID())) {
-				throw new AdempiereUserError(msg);
-			} else {
-				log.warning(msg);
-			}
+			// Try do Find Register without Business Partner
+			// Warning will not work if non-standard costing is used
+			sql = "SELECT ABS(((cc.currentcostprice-(SELECT SUM(c.currentcostprice*bomline.qtybom)"
+	            + " FROM m_cost c"
+	            + " INNER JOIN pp_product_bomline bomline ON (c.m_product_id=bomline.m_product_id)"
+	            + " INNER JOIN pp_product_bom bom ON (bomline.PP_Product_BOM_ID=bom.PP_Product_BOM_ID)"
+		        + " INNER JOIN m_costelement ce ON (c.m_costelement_id = ce.m_costelement_id AND ce.costingmethod = 'S')"
+	            + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND COALESCE (bom.ValidTo, SYSDATE)";
+
+			sql = sql + " AND bom.C_BPartner_ID IS NULL";
+				
+            sql = sql + " ))/cc.currentcostprice))"
+            + " FROM m_product pp"
+            + " INNER JOIN m_cost cc on (cc.m_product_id=pp.m_product_id)"
+            + " INNER JOIN m_costelement ce ON (cc.m_costelement_id=ce.m_costelement_id)"
+            + " WHERE cc.currentcostprice > 0 AND pp.M_Product_ID = ? "
+            + "AND ce.costingmethod='S'";
+            
+            costPercentageDiff = DB.getSQLValueBD(get_TrxName(), sql, M_Product_ID);
+			
+            if (costPercentageDiff == null)
+            {	
+				costPercentageDiff = Env.ZERO;
+				String msg = "Could not retrieve costs";
+				if (MSysConfig.getBooleanValue(MSysConfig.MFG_ValidateCostsOnCreate, false, getAD_Client_ID())) {
+					throw new AdempiereUserError(msg);
+				} else {
+					log.warning(msg);
+				}
+            }	
 		}
 		
 		if ( (costPercentageDiff.compareTo(new BigDecimal("0.005")))< 0 )
@@ -182,7 +205,16 @@ public class ProcProductionCreate extends SvrProcess
 		int materials = DB.getSQLValue(get_TrxName(), sql.toString(), M_Product_ID);
 		if (materials == 0)
 		{
-			throw new AdempiereUserError ("Attempt to create product line for Bill Of Materials with no BOM Products");
+			// Try do Find Register without Business Partner
+			sql.append("SELECT count(ppl.PP_Product_BOMLine_ID) FROM PP_Product_BOMLine ppl ");
+			sql.append("INNER JOIN PP_Product_BOM pp ON pp.PP_Product_BOM_ID = ppl.PP_Product_BOM_ID ");
+			sql.append("WHERE pp.M_Product_ID = ? AND SYSDATE Between pp.ValidFrom AND COALESCE (pp.ValidTo, SYSDATE) ");
+			sql.append("AND pp.C_BPartner_ID IS NULL");
+			
+			materials = DB.getSQLValue(get_TrxName(), sql.toString(), M_Product_ID);
+			
+			if (materials == 0)
+				throw new AdempiereUserError ("Attempt to create product line for Bill Of Materials with no BOM Products");
 		}
 	}
 }

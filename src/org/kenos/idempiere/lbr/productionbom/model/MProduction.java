@@ -136,9 +136,9 @@ public class MProduction extends org.compiere.model.MProduction {
 				+ " WHERE pp.M_Product_ID=" + finishedProduct.getM_Product_ID();
 				
 				if (C_BPartner_ID == 0)
-					sql = sql + " AND C_BPartner_ID IS NULL ";
+					sql = sql + " AND pp.C_BPartner_ID IS NULL ";
 				else
-					sql = sql + " AND C_BPartner_ID = " + C_BPartner_ID ;
+					sql = sql + " AND pp.C_BPartner_ID = " + C_BPartner_ID ;
 				
 				sql = sql + " AND SYSDATE Between pp.ValidFrom AND pp.ValidTo ORDER BY ppl.Line";
 
@@ -149,6 +149,26 @@ public class MProduction extends org.compiere.model.MProduction {
 			pstmt = DB.prepareStatement(sql, get_TrxName());
 
 			rs = pstmt.executeQuery();
+			
+			// Try do Find Register without Business Partner
+			if (!rs.isBeforeFirst() )
+			{				
+				rs = null;
+				
+				sql = "SELECT ppl.M_Product_ID, ppl.QtyBOM" + " FROM PP_Product_BOMLine ppl"
+						+ " INNER JOIN PP_Product_Bom pp ON pp.PP_Product_Bom_ID = ppl.PP_Product_Bom_ID"
+						+ " WHERE pp.M_Product_ID=" + finishedProduct.getM_Product_ID()
+						+ " AND pp.C_BPartner_ID IS NULL "
+						+ " AND SYSDATE Between pp.ValidFrom AND pp.ValidTo ORDER BY ppl.Line";
+			
+			
+			PreparedStatement pstmt2 = DB.prepareStatement(sql, get_TrxName());
+			pstmt2 = DB.prepareStatement(sql, get_TrxName());
+
+			rs = pstmt2.executeQuery();
+			
+			}
+			
 			while (rs.next()) {
 				
 				lineno = lineno + 10;
