@@ -35,7 +35,7 @@ UPDATE AD_Field SET SeqNo=135, AD_Reference_Value_ID=NULL, AD_Val_Rule_ID=NULL, 
 ;
 
 -- 18/07/2018 11h54min56s BRT
-UPDATE AD_Tab SET DisplayLogic='@IsBOM@=''Y'' AND 1=2' WHERE  AD_Tab_ID=317
+UPDATE AD_Tab SET DisplayLogic='@IsBOM@=''Y'' & 1=2' WHERE  AD_Tab_ID=317
 ;
 
 -- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
