@@ -74,7 +74,7 @@ public class ProcProductionCreate extends SvrProcess
             + " INNER JOIN pp_product_bomline bomline ON (c.m_product_id=bomline.m_product_id)"
             + " INNER JOIN pp_product_bom bom ON (bomline.PP_Product_BOM_ID=bom.PP_Product_BOM_ID)"
 	        + " INNER JOIN m_costelement ce ON (c.m_costelement_id = ce.m_costelement_id AND ce.costingmethod = 'S')"
-            + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND COALESCE (bom.ValidTo, SYSDATE)";
+            + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND NVL (bom.ValidTo, SYSDATE + 1)";
            
 			if (C_BPartner_ID > 0)
     			sql = sql + " AND bom.C_BPartner_ID = " + C_BPartner_ID;
@@ -99,7 +99,7 @@ public class ProcProductionCreate extends SvrProcess
 	            + " INNER JOIN pp_product_bomline bomline ON (c.m_product_id=bomline.m_product_id)"
 	            + " INNER JOIN pp_product_bom bom ON (bomline.PP_Product_BOM_ID=bom.PP_Product_BOM_ID)"
 		        + " INNER JOIN m_costelement ce ON (c.m_costelement_id = ce.m_costelement_id AND ce.costingmethod = 'S')"
-	            + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND COALESCE (bom.ValidTo, SYSDATE)";
+	            + " WHERE bom.m_product_id = pp.m_product_id AND SYSDATE Between bom.ValidFrom AND NVL (bom.ValidTo, SYSDATE + 1)";
 
 			sql = sql + " AND bom.C_BPartner_ID IS NULL";
 				
@@ -195,7 +195,7 @@ public class ProcProductionCreate extends SvrProcess
 		
 		sql.append("SELECT count(ppl.PP_Product_BOMLine_ID) FROM PP_Product_BOMLine ppl ");
 		sql.append("INNER JOIN PP_Product_BOM pp ON pp.PP_Product_BOM_ID = ppl.PP_Product_BOM_ID ");
-		sql.append("WHERE pp.M_Product_ID = ? AND SYSDATE Between pp.ValidFrom AND COALESCE (pp.ValidTo, SYSDATE) ");
+		sql.append("WHERE pp.M_Product_ID = ? AND SYSDATE Between pp.ValidFrom AND NVL (pp.ValidTo, SYSDATE + 1) ");
 		
 		if (C_BPartner_ID > 0)
 			sql.append("AND pp.C_BPartner_ID = " + C_BPartner_ID);
@@ -208,7 +208,7 @@ public class ProcProductionCreate extends SvrProcess
 			// Try do Find Register without Business Partner
 			sql.append("SELECT count(ppl.PP_Product_BOMLine_ID) FROM PP_Product_BOMLine ppl ");
 			sql.append("INNER JOIN PP_Product_BOM pp ON pp.PP_Product_BOM_ID = ppl.PP_Product_BOM_ID ");
-			sql.append("WHERE pp.M_Product_ID = ? AND SYSDATE Between pp.ValidFrom AND COALESCE (pp.ValidTo, SYSDATE) ");
+			sql.append("WHERE pp.M_Product_ID = ? AND SYSDATE Between pp.ValidFrom AND NVL (pp.ValidTo, SYSDATE + 1) ");
 			sql.append("AND pp.C_BPartner_ID IS NULL");
 			
 			materials = DB.getSQLValue(get_TrxName(), sql.toString(), M_Product_ID);

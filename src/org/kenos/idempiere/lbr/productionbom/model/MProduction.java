@@ -140,7 +140,7 @@ public class MProduction extends org.compiere.model.MProduction {
 				else
 					sql = sql + " AND pp.C_BPartner_ID = " + C_BPartner_ID ;
 				
-				sql = sql + " AND SYSDATE Between pp.ValidFrom AND pp.ValidTo ORDER BY ppl.Line";
+				sql = sql + " AND SYSDATE Between pp.ValidFrom AND NVL(pp.ValidTo, SYSDATE) ORDER BY ppl.Line";
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -159,7 +159,7 @@ public class MProduction extends org.compiere.model.MProduction {
 						+ " INNER JOIN PP_Product_Bom pp ON pp.PP_Product_Bom_ID = ppl.PP_Product_Bom_ID"
 						+ " WHERE pp.M_Product_ID=" + finishedProduct.getM_Product_ID()
 						+ " AND pp.C_BPartner_ID IS NULL "
-						+ " AND SYSDATE Between pp.ValidFrom AND pp.ValidTo ORDER BY ppl.Line";
+						+ " AND SYSDATE Between pp.ValidFrom AND NVL(pp.ValidTo, SYSDATE) ORDER BY ppl.Line";
 			
 			
 			PreparedStatement pstmt2 = DB.prepareStatement(sql, get_TrxName());
