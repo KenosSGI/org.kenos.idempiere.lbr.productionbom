@@ -143,6 +143,7 @@ public class MProduction extends org.compiere.model.MProduction {
 				sql = sql + " AND SYSDATE Between pp.ValidFrom AND NVL(pp.ValidTo, SYSDATE) ORDER BY ppl.Line";
 
 		PreparedStatement pstmt = null;
+		PreparedStatement pstmt2 = null;
 		ResultSet rs = null;
 
 		try {
@@ -152,8 +153,9 @@ public class MProduction extends org.compiere.model.MProduction {
 			
 			// Try do Find Register without Business Partner
 			if (!rs.isBeforeFirst() )
-			{				
-				rs = null;
+			{
+				DB.close(rs, pstmt);
+				rs = null; pstmt = null;
 				
 				sql = "SELECT ppl.M_Product_ID, ppl.QtyBOM" + " FROM PP_Product_BOMLine ppl"
 						+ " INNER JOIN PP_Product_Bom pp ON pp.PP_Product_Bom_ID = ppl.PP_Product_Bom_ID"
@@ -162,7 +164,6 @@ public class MProduction extends org.compiere.model.MProduction {
 						+ " AND SYSDATE Between pp.ValidFrom AND NVL(pp.ValidTo, SYSDATE) ORDER BY ppl.Line";
 			
 			
-			PreparedStatement pstmt2 = DB.prepareStatement(sql, get_TrxName());
 			pstmt2 = DB.prepareStatement(sql, get_TrxName());
 
 			rs = pstmt2.executeQuery();
@@ -335,6 +336,8 @@ public class MProduction extends org.compiere.model.MProduction {
 		}
 		finally {
 			DB.close(rs, pstmt);
+			DB.close(rs, pstmt2);
+			rs = null; pstmt = null; pstmt2 = null;
 		}
 
 		return count;
