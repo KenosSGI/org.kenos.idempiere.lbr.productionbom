@@ -1,0 +1,6 @@
+pom.xml
+*/target/
+*/lib/
+*/bin/
+bin/
+org.kenos.idempiere.lbr.p2.targetplatform/org.kenos.idempiere.lbr.p2.targetplatform.target
